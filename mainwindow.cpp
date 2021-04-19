@@ -8,6 +8,8 @@
 #include <QTreeView>
 #include <QSortFilterProxyModel>
 
+#include "FileSystemList.h"
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -15,57 +17,21 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     QFileInfoList drives = QDir::drives();
-
     for (auto& path : drives) {
-        qDebug() << path;
-        QStorageInfo storage(path.path());
-
-//        qDebug() << storage.rootPath();
-//        qDebug() << "name:" << storage.name();
-//        qDebug() << "fileSystemType:" << storage.fileSystemType();
-//        qDebug() << "size:" << storage.bytesTotal()/1000/1000/1000 << "GB";
-//        qDebug() << "availableSize:" << storage.bytesAvailable()/1000/1000/1000 << "GB";
-//        qDebug() << "\n";
-
         ui->diskLetter->addItem(path.path());
-        ui->diskInfo->setText(((storage.name() != "") ? storage.name() : "Local disk") + " | Free space: " + (QString::number(storage.bytesAvailable()/1024/1024/1024) + " GB of " + QString::number(storage.bytesTotal()/1024/1024/1024) + " GB"));
-//        ui->usedSpace->setValue(100 - ((static_cast<float>(storage.bytesAvailable()/1024/1024/1024) / static_cast<float>(storage.bytesTotal()/1024/1024/1024)) * 100));
-//        qDebug() << 100 - ((static_cast<float>(storage.bytesAvailable()/1024/1024/1024) / static_cast<float>(storage.bytesTotal()/1024/1024/1024)) * 100);
-
-        // Create new item (top level item)
-        QTreeWidgetItem *topLevelItem = new QTreeWidgetItem(ui->tree);
-        // Add it on our tree as the top item.
-        ui->tree->addTopLevelItem(topLevelItem);
-        topLevelItem->setText(0, storage.rootPath());
-        // Set text for item
-        QString diskName = (storage.name() != "") ? storage.name() : "Local disk";
-        topLevelItem->setText(1, diskName + " (" + storage.rootPath() + ")");
-
-//        QDir currentDrive(storage.rootPath());
-
-//        for (auto& subItem : currentDrive.entryList()) {
-//            // Create new item and add as child item
-//            QTreeWidgetItem *item=new QTreeWidgetItem(topLevelItem);
-//            // Set text for item
-//            item->setText(1, subItem);
-//        }
     }
 
-//    ui->tree->hideColumn(0);
-    connect(ui->diskLetter, &QComboBox::currentTextChanged, this, &MainWindow::changeDisk);
-    connect(&model, &QFileSystemModel::directoryLoaded, this, &MainWindow::changeDir);
-    //connect(ui->treeView, &QAbstractItemView::doubleClicked, ui->treeView, &QTreeView::setRootIndex);
+    fslist = new FileSystemList("C:/");
+    ui->fileSystemListContainer->insertWidget(0, fslist);
+    ui->fileSystemListContainer->setCurrentIndex(0);
 
-    model.setRootPath("C:/");
-    ui->diskLetter->setCurrentText(QDir::rootPath());
-//    ui->treeView->setModel(&model);
-//    ui->listView->setModel(&model);
+    ui->diskLetter->setCurrentText("C:/");
+    
+    connect(ui->btnChangePath, &QPushButton::clicked, this, &MainWindow::btnChangePath);
 
-    /*ui->treeView->setModel(&model);
-    ui->treeView->setRootIsDecorated(false);
-    ui->treeView->setExpandsOnDoubleClick(false);*/
-
-//    ui->path->setText(dir.currentPath());
+    connect(ui->diskLetter, &QComboBox::textActivated, this, &MainWindow::changePath);
+    connect(fslist, &FileSystemList::pathChanged, this, &MainWindow::updatePath);
+    connect(fslist, &FileSystemList::historyStatusChange, this, &MainWindow::listHistoryStatusChange);
 }
 
 MainWindow::~MainWindow()
@@ -73,45 +39,65 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::changeDisk(const QString &path)
-{
-    QStorageInfo storage(path);
-    ui->diskInfo->setText(((storage.name() != "") ? storage.name() : "Local disk") + " | Free space: " +             (QString::number(storage.bytesAvailable()/1024/1024/1024) + " GB of " + QString::number(storage.bytesTotal()/1024/1024/1024) + " GB"));
-    model.setRootPath(path);
-}
-
-void MainWindow::changeDir(const QString &path)
-{
-//    qDebug() << path;
-    ui->path->setText(path);
-}
-
-void MainWindow::on_treeView_activated(const QModelIndex &index)
-{
-//    ui->listView->setRootIndex(index);
-}
-
-void MainWindow::on_listView_activated(const QModelIndex &index)
-{
-//    ui->listView->setRootIndex(index);
-//    qDebug() << model.rootPath();
-//    ui->treeView->setCurrentIndex(index);
-//    ui->treeView->expand(index);
-}
-
 void MainWindow::on_btnBack_clicked()
 {
-
+    fslist->historyGoBack();
 }
 
 void MainWindow::on_btnForward_clicked()
 {
-
+    fslist->historyGoForward();
 }
 
 void MainWindow::on_btnParent_clicked()
 {
-    //qDebug() << ui->treeView->currentIndex().parent();
-    //ui->treeView->setCurrentIndex(ui->treeView->currentIndex().parent());
-//    ui->treeView->setRootIndex(ui->treeView->currentIndex().parent());
+    fslist->goToParent();
+}
+
+void MainWindow::btnChangePath()
+{
+    fslist->changePath(ui->path->text());
+}
+
+void MainWindow::changePath(const QString& path)
+{
+    fslist->changePath(path);
+    ui->path->setText(path);
+    QStorageInfo storage(path);
+    ui->diskInfo->setText(((storage.name() != "") ? storage.name() : "Local disk") + " | Free space: " + (QString::number(storage.bytesAvailable() / 1024 / 1024 / 1024) + " GB of " + QString::number(storage.bytesTotal() / 1024 / 1024 / 1024) + " GB"));
+}
+
+void MainWindow::updatePath(const QString &path)
+{
+    ui->path->setText(path);
+
+    QString diskLetter = path.left(3);
+
+    if (diskLetter.compare(ui->diskLetter->currentText(), Qt::CaseInsensitive) != 0) {
+        QStorageInfo storage(diskLetter);
+        ui->diskLetter->setCurrentText(diskLetter);
+        ui->diskInfo->setText(((storage.name() != "") ? storage.name() : "Local disk") + " | Free space: " + (QString::number(storage.bytesAvailable() / 1024 / 1024 / 1024) + " GB of " + QString::number(storage.bytesTotal() / 1024 / 1024 / 1024) + " GB"));
+    }
+}
+
+void MainWindow::listHistoryStatusChange(FileSystemList::HistoryStatus status)
+{
+    switch (status) {
+    case FileSystemList::HistoryStatus::NoPrevious: {
+        ui->btnBack->setDisabled(true);
+        break;
+    }
+    case FileSystemList::HistoryStatus::NoFurther: {
+        ui->btnForward->setDisabled(true);
+        break;
+    }
+    case FileSystemList::HistoryStatus::HasPrevious: {
+        ui->btnBack->setDisabled(false);
+        break;
+    }
+    case FileSystemList::HistoryStatus::HasFurther: {
+        ui->btnForward->setDisabled(false);
+        break;
+    }
+    }
 }

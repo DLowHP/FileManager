@@ -7,6 +7,8 @@
 #include <QDir>
 #include <QFileSystemModel>
 
+#include "FileSystemList.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -24,14 +26,15 @@ private:
 
     QDir dir;
     QFileSystemModel model;
+    FileSystemList* fslist;
 
 private slots:
-    void changeDisk(const QString &path);
-    void changeDir(const QString &path);
-    void on_treeView_activated(const QModelIndex &index);
-    void on_listView_activated(const QModelIndex &index);
     void on_btnBack_clicked();
     void on_btnForward_clicked();
     void on_btnParent_clicked();
+    void btnChangePath();
+    void changePath(const QString &path);
+    void updatePath(const QString& path);
+    void listHistoryStatusChange(FileSystemList::HistoryStatus status);
 };
 #endif // MAINWINDOW_H

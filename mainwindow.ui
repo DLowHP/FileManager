@@ -15,33 +15,13 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0" colspan="2">
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
-      <item>
-       <widget class="QComboBox" name="diskLetter"/>
-      </item>
-      <item>
-       <widget class="QLabel" name="diskInfo">
-        <property name="text">
-         <string>Disk info</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="2" column="0">
-     <widget class="QTreeWidget" name="tree">
-      <column>
-       <property name="text">
-        <string notr="true">1</string>
-       </property>
-      </column>
-     </widget>
-    </item>
     <item row="1" column="0" colspan="2">
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <widget class="QPushButton" name="btnBack">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>&lt;</string>
         </property>
@@ -49,6 +29,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="btnForward">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>&gt;</string>
         </property>
@@ -64,6 +47,32 @@
       <item>
        <widget class="QLineEdit" name="path"/>
       </item>
+      <item>
+       <widget class="QPushButton" name="btnChangePath">
+        <property name="text">
+         <string>Go</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="2" column="0">
+     <widget class="QStackedWidget" name="fileSystemListContainer">
+      <widget class="QWidget" name="main"/>
+     </widget>
+    </item>
+    <item row="0" column="0" colspan="2">
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
+      <item>
+       <widget class="QComboBox" name="diskLetter"/>
+      </item>
+      <item>
+       <widget class="QLabel" name="diskInfo">
+        <property name="text">
+         <string>Disk info</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>
@@ -74,7 +83,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
