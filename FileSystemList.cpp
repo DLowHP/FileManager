@@ -3,8 +3,14 @@
 
 #include <QDebug>
 #include <QDir>
+#include <QFile>
+#include <QUrl>
 #include <QDateTime>
 #include <QTreeWidgetItem>
+#include <QDesktopServices>
+#include <QProcess>
+
+#include "TextInputDialog.h"
 
 FileSystemList::FileSystemList(QString path,  QWidget* parent) :
     QWidget(parent),
@@ -14,6 +20,9 @@ FileSystemList::FileSystemList(QString path,  QWidget* parent) :
 
     pathHistory.append(path);
     currentPathIndex = 0;
+
+    clipboard = "";
+    clipboardStatus = ClipboardStatus::None;
 
     QDir currentPath = pathHistory.at(currentPathIndex);
     loadContents(&currentPath);
@@ -95,6 +104,148 @@ void FileSystemList::goToParent()
     loadContents(&currentPath);
 }
 
+void FileSystemList::copy()
+{
+    if (ui->tree->currentItem()) {
+        clipboard = ui->tree->currentItem()->text(0);
+        clipboardStatus = ClipboardStatus::Copy;
+        qDebug() << clipboard;
+    }
+}
+
+void FileSystemList::cut()
+{
+    if (ui->tree->currentItem()) {
+        clipboard = ui->tree->currentItem()->text(0);
+        clipboardStatus = ClipboardStatus::Cut;
+        qDebug() << clipboard;
+    }
+}
+
+void FileSystemList::paste()
+{
+    if (clipboard != "") {
+        switch (clipboardStatus) {
+        case ClipboardStatus::Copy: {
+            QFileInfo file(clipboard);
+            //QString pathB(pathHistory[currentPathIndex] + file.fileName());
+            QFile::copy(clipboard, pathHistory[currentPathIndex] + "/" + file.fileName());
+            qDebug() << clipboard << "\n";
+            qDebug() << pathHistory[currentPathIndex] + "/" + file.fileName();
+            break;
+        }
+        case ClipboardStatus::Cut: {
+            QFileInfo file(clipboard);
+            //QString pathB(pathHistory[currentPathIndex] + file.fileName());
+            QFile::copy(clipboard, pathHistory[currentPathIndex] + "/" + file.fileName());
+
+            QFile oldFile(clipboard);
+            oldFile.moveToTrash();
+            break;
+        }
+        case ClipboardStatus::None: break;
+        }
+
+        QDir current(pathHistory[currentPathIndex]);
+        loadContents(&current);
+    }
+}
+
+void FileSystemList::newFolder()
+{
+    TextInputDialog* d = new TextInputDialog();
+    d->setLabel("Enter folder name: ");
+    connect(d, &TextInputDialog::text, this, &FileSystemList::createNewFolder);
+    d->exec();
+}
+
+void FileSystemList::createNewFolder(const QString& name)
+{
+    if (name != "") {
+        QDir current(pathHistory[currentPathIndex]);
+        current.mkdir(name);
+        loadContents(&current);
+    }
+}
+
+void FileSystemList::renameItem()
+{
+    qDebug() << "Rename item";
+
+    if (ui->tree->currentItem()) {
+        TextInputDialog* d = new TextInputDialog();
+        d->setLabel("Enter new item name: ");
+        d->setInputText(ui->tree->currentItem()->text(0));
+        connect(d, &TextInputDialog::text, this, &FileSystemList::setNewName);
+        d->exec();
+    }
+}
+
+void FileSystemList::newTextFile()
+{
+    QDir current(pathHistory[currentPathIndex]);
+    TextInputDialog* d = new TextInputDialog();
+    d->setLabel("Enter new text file name: ");
+    d->setInputText(".txt");
+    connect(d, &TextInputDialog::text, this, &FileSystemList::createNewFile);
+    d->exec();
+}
+
+void FileSystemList::newOtherFile()
+{
+    QDir current(pathHistory[currentPathIndex]);
+    TextInputDialog* d = new TextInputDialog();
+    d->setLabel("Enter new text file name: ");
+    d->setInputText(".txt");
+    connect(d, &TextInputDialog::text, this, &FileSystemList::createNewFile);
+    d->exec();
+}
+
+void FileSystemList::createNewFile(const QString& name)
+{
+    if (name != "") {
+        QFile file(pathHistory[currentPathIndex] + "/" + name);
+        file.open(QIODevice::WriteOnly);
+
+        QDir current(pathHistory[currentPathIndex]);
+        loadContents(&current);
+    }
+}
+
+void FileSystemList::openCmd()
+{
+    //cmd.startDetached("cmd", QStringList() << "/K \"cd /d '" + pathHistory[currentPathIndex] + "'\"");
+    //QProcess::startDetached("cmd /K cmd /K \"cd /d " + pathHistory[currentPathIndex] + "'\"");
+    QProcess::startDetached("cmd", QStringList() << "/K \"cd /d '" + pathHistory[currentPathIndex] + "'\"", pathHistory[currentPathIndex]);
+}
+
+void FileSystemList::openPowerShell()
+{
+    QProcess::startDetached("powershell", QStringList() << "-NoExit -command \"cd /d '" + pathHistory[currentPathIndex] + "'\"", pathHistory[currentPathIndex]);
+}
+
+void FileSystemList::setNewName(const QString& name)
+{
+    if (name != "") {
+        QDir item(ui->tree->currentItem()->text(0));
+        item.rename(ui->tree->currentItem()->text(0), name);
+
+        // Reload dir
+        QDir current(pathHistory[currentPathIndex]);
+        loadContents(&current);
+    }
+}
+
+void FileSystemList::deleteItem()
+{
+    if (ui->tree->currentItem()) {
+        QFile file(ui->tree->currentItem()->text(0));
+        file.moveToTrash();
+        QDir current(pathHistory[currentPathIndex]);
+        loadContents(&current);
+    }
+}
+
 void FileSystemList::loadContents(QDir* dir)
 {
     ui->tree->clear();
@@ -144,5 +295,8 @@ void FileSystemList::listItemDoubleClicked(QTreeWidgetItem* item)
     }
     else {
         qDebug() << "It's a file";
+
+        QUrl path(item->text(0));
+        QDesktopServices::openUrl(path);
     }
 }

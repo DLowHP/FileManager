@@ -15,6 +15,25 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
+    <item row="2" column="0">
+     <widget class="QStackedWidget" name="fileSystemListContainer">
+      <widget class="QWidget" name="main"/>
+     </widget>
+    </item>
+    <item row="0" column="0" colspan="2">
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
+      <item>
+       <widget class="QComboBox" name="diskLetter"/>
+      </item>
+      <item>
+       <widget class="QLabel" name="diskInfo">
+        <property name="text">
+         <string>Disk info</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
     <item row="1" column="0" colspan="2">
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
@@ -52,24 +71,52 @@
         <property name="text">
          <string>Go</string>
         </property>
+        <property name="shortcut">
+         <string>Return</string>
+        </property>
        </widget>
       </item>
      </layout>
     </item>
-    <item row="2" column="0">
-     <widget class="QStackedWidget" name="fileSystemListContainer">
-      <widget class="QWidget" name="main"/>
-     </widget>
-    </item>
-    <item row="0" column="0" colspan="2">
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
+    <item row="3" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
-       <widget class="QComboBox" name="diskLetter"/>
+       <widget class="QPushButton" name="btnCopy">
+        <property name="text">
+         <string>F5 Copy</string>
+        </property>
+        <property name="shortcut">
+         <string>F5</string>
+        </property>
+       </widget>
       </item>
       <item>
-       <widget class="QLabel" name="diskInfo">
+       <widget class="QPushButton" name="btnMove">
         <property name="text">
-         <string>Disk info</string>
+         <string>F6 Move</string>
+        </property>
+        <property name="shortcut">
+         <string>F6</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnPaste">
+        <property name="text">
+         <string>F7 Paste</string>
+        </property>
+        <property name="shortcut">
+         <string>F7</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnNewFolder">
+        <property name="text">
+         <string>F8 New folder</string>
+        </property>
+        <property name="shortcut">
+         <string>F8</string>
         </property>
        </widget>
       </item>
@@ -86,8 +133,125 @@
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <addaction name="actionNewWindow"/>
+    <addaction name="actionOpenCmd"/>
+    <addaction name="actionOpenPowerShell"/>
+    <addaction name="separator"/>
+    <addaction name="actionHelp"/>
+    <addaction name="actionClose"/>
+   </widget>
+   <widget class="QMenu" name="menuHome">
+    <property name="title">
+     <string>Home</string>
+    </property>
+    <widget class="QMenu" name="menuNew">
+     <property name="title">
+      <string>New item</string>
+     </property>
+     <addaction name="actionTextFile"/>
+     <addaction name="actionOtherFormat"/>
+    </widget>
+    <addaction name="actionCopy"/>
+    <addaction name="actionCut"/>
+    <addaction name="actionPaste"/>
+    <addaction name="separator"/>
+    <addaction name="actionDelete"/>
+    <addaction name="actionRename"/>
+    <addaction name="separator"/>
+    <addaction name="actionNewFolder"/>
+    <addaction name="menuNew"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuHome"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionNewWindow">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>New window</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionOpenCmd">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Open cmd here</string>
+   </property>
+  </action>
+  <action name="actionOpenPowerShell">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Open PowerShell here</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="text">
+    <string>Help</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionClose">
+   <property name="text">
+    <string>Close</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="text">
+    <string>Copy</string>
+   </property>
+  </action>
+  <action name="actionCut">
+   <property name="text">
+    <string>Cut</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="text">
+    <string>Paste</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="text">
+    <string>Delete</string>
+   </property>
+  </action>
+  <action name="actionRename">
+   <property name="text">
+    <string>Rename</string>
+   </property>
+  </action>
+  <action name="actionNewFolder">
+   <property name="text">
+    <string>New folder</string>
+   </property>
+  </action>
+  <action name="actionTextFile">
+   <property name="text">
+    <string>Text file (.txt)</string>
+   </property>
+  </action>
+  <action name="actionOtherFormat">
+   <property name="text">
+    <string>Other format</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

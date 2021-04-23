@@ -10,15 +10,18 @@ CONFIG += c++11
 
 SOURCES += \
     FileSystemList.cpp \
+    TextInputDialog.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     FileSystemList.h \
+    TextInputDialog.h \
     mainwindow.h
 
 FORMS += \
     FileSystemList.ui \
+    TextInputDialog.ui \
     mainwindow.ui
 
 # Default rules for deployment.

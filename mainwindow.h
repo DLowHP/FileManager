@@ -36,5 +36,6 @@ private slots:
     void changePath(const QString &path);
     void updatePath(const QString& path);
     void listHistoryStatusChange(FileSystemList::HistoryStatus status);
+    void closeApp();
 };
 #endif // MAINWINDOW_H

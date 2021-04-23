@@ -5,6 +5,7 @@
 #include <QVector>
 #include <QDir>
 #include <QTreeWidgetItem>
+#include <QProcess>
 
 namespace Ui {
 class FileSystemList;
@@ -30,6 +31,18 @@ public:
     void changePath(const QString& path);
     void goToParent();
 
+public slots:
+    void copy();
+    void cut();
+    void paste();
+    void newFolder();
+    void deleteItem();
+    void renameItem();
+    void newTextFile();
+    void newOtherFile();
+    void openCmd();
+    void openPowerShell();
+
 private:
     Ui::FileSystemList *ui;
 
@@ -38,8 +51,19 @@ private:
     QVector<QString> pathHistory;
     int currentPathIndex;
 
+    QString clipboard;
+    enum class ClipboardStatus {
+        None,
+        Copy,
+        Cut
+    };
+    ClipboardStatus clipboardStatus;
+
 private slots:
     void listItemDoubleClicked(QTreeWidgetItem* item);
+    void createNewFolder(const QString& name);
+    void setNewName(const QString& name);
+    void createNewFile(const QString& name);
 
 signals:
     void pathChanged(const QString& path);

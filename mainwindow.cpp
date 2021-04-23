@@ -7,6 +7,7 @@
 #include <QFileSystemModel>
 #include <QTreeView>
 #include <QSortFilterProxyModel>
+#include <QApplication>
 
 #include "FileSystemList.h"
 
@@ -28,6 +29,28 @@ MainWindow::MainWindow(QWidget *parent)
     ui->diskLetter->setCurrentText("C:/");
     
     connect(ui->btnChangePath, &QPushButton::clicked, this, &MainWindow::btnChangePath);
+    connect(ui->btnCopy, &QPushButton::clicked, fslist, &FileSystemList::copy);
+    connect(ui->btnMove, &QPushButton::clicked, fslist, &FileSystemList::cut);
+    connect(ui->btnPaste, &QPushButton::clicked, fslist, &FileSystemList::paste);
+    connect(ui->btnNewFolder, &QPushButton::clicked, fslist, &FileSystemList::newFolder);
+
+    // File menu
+    //connect(ui->actionNewWindow, &QAction::triggered, this, &MainWindow::openNewWindow);
+    connect(ui->actionOpenCmd, &QAction::triggered, fslist, &FileSystemList::openCmd);
+    connect(ui->actionOpenPowerShell, &QAction::triggered, fslist, &FileSystemList::openPowerShell);
+    //connect(ui->actionHelp, &QAction::triggered, fslist, &MainWindow::openHelp);
+    connect(ui->actionClose, &QAction::triggered, this, &MainWindow::closeApp);
+
+    // Home menu
+    connect(ui->actionCopy, &QAction::triggered, fslist, &FileSystemList::copy);
+    connect(ui->actionCut, &QAction::triggered, fslist, &FileSystemList::cut);
+    connect(ui->actionPaste, &QAction::triggered, fslist, &FileSystemList::paste);
+    connect(ui->actionDelete, &QAction::triggered, fslist, &FileSystemList::deleteItem);
+    connect(ui->actionRename, &QAction::triggered, fslist, &FileSystemList::renameItem);
+    connect(ui->actionNewFolder, &QAction::triggered, fslist, &FileSystemList::newFolder);
+        // New item submenu
+    connect(ui->actionTextFile, &QAction::triggered, fslist, &FileSystemList::newTextFile);
+    connect(ui->actionOtherFormat, &QAction::triggered, fslist, &FileSystemList::newOtherFile);
 
     connect(ui->diskLetter, &QComboBox::textActivated, this, &MainWindow::changePath);
     connect(fslist, &FileSystemList::pathChanged, this, &MainWindow::updatePath);
@@ -100,4 +123,9 @@ void MainWindow::listHistoryStatusChange(FileSystemList::HistoryStatus status)
         break;
     }
     }
+}
+
+void MainWindow::closeApp()
+{
+    QApplication::exit(0);
 }
